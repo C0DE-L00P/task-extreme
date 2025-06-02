@@ -1,7 +1,16 @@
 {
-  "name": "my-react-app",
+  "name": "github-users",
   "private": true,
   "version": "0.0.0",
+  "author": "Mohamed Gamal Yaseen",
+  "license": "MIT",
+  "description": "A simple app to search for GitHub users and add them to favorites",
+  "email": "mohamedgyaseen@gmail.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/C0DE-L00P/task-extreme.git"
+  },
+  
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,8 +19,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.8",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "tailwindcss": "^4.1.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
