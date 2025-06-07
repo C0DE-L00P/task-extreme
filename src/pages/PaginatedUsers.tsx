@@ -11,17 +11,19 @@ export default function PaginatedUsers() {
   const [searchParams, setSearchParams] = useSearchParams()
   const lastUserId = Number(searchParams.get('since') || '1')
   const searchTerm = searchParams.get('q') || ''
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
+    setIsLoading(true)
     fetch(`https://api.github.com/users?per_page=${PER_PAGE}&since=${lastUserId}`)
       .then(res => res.json())
       .then(data => {
-        console.log(data)
         if(data.message && data.message.includes('API rate limit exceeded')) throw new Error(data.message);
         setUsers(data)
       }).catch((err:any) => {
         toast.error(err.message);
       })
+      .finally(() => setIsLoading(false))
   }, [lastUserId])
 
   const filteredUsers = useMemo(() => {
@@ -30,7 +32,6 @@ export default function PaginatedUsers() {
       user.login.toLowerCase().includes(searchTerm.toLowerCase())
     )
   }, [users, searchTerm]);
-
 
   const handleSearch = useMemo(() => {
     const debounced = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,7 +64,7 @@ export default function PaginatedUsers() {
       <div className="bg-gray-50 rounded-xl shadow-inner p-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredUsers && filteredUsers.map(user => (
-            <UserCard key={user.id} user={user} />
+            <UserCard key={user.id} user={user} isLoading={isLoading} />
           ))}
         </div>
       </div>
