@@ -1,6 +1,8 @@
+import { useFavoriteStore } from "../store/useFavoriteStore";
 import type { GitHubUser } from "../types";
 
-export default function UserCardWide({ user, style , key}: { user: GitHubUser; style: React.CSSProperties, key: string | number }) {
+export default function UserCardWide({ user, style , key, optionRemoveOnly= false}: { user: GitHubUser; style: React.CSSProperties, key: string | number, optionRemoveOnly?: boolean }) {
+  const { removeFavorite, isFavorite, addFavorite } = useFavoriteStore()
   return (
     <div className="px-4" style={style} key={key}>
       <div className="flex items-center bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200">
@@ -37,7 +39,7 @@ export default function UserCardWide({ user, style , key}: { user: GitHubUser; s
             </svg>
           </a>
         </div>
-        <button className="ml-4 p-2 text-gray-400 hover:text-red-500 transition-colors">
+        <button className={`cursor-pointer ml-4 p-2 text-gray-400 hover:text-red-500 transition-colors ${isFavorite(user.id) ? 'text-red-500' : ''}`} onClick={() => optionRemoveOnly ? removeFavorite(user.id) : isFavorite(user.id) ? removeFavorite(user.id) : addFavorite(user)}>
           <svg
             className="w-6 h-6"
             fill="none"

@@ -1,3 +1,4 @@
+import { useFavoriteStore } from "../store/useFavoriteStore";
 import type { GitHubUser } from "../types";
 
 function SkeletonUserCard() {
@@ -19,6 +20,7 @@ function SkeletonUserCard() {
 }
 
 export default function UserCard({ user, isLoading }: { user?: GitHubUser; isLoading?: boolean }) {
+  const { addFavorite, isFavorite } = useFavoriteStore()
   if (isLoading) return <SkeletonUserCard />;
   if (!user) return null;
 
@@ -65,7 +67,7 @@ export default function UserCard({ user, isLoading }: { user?: GitHubUser; isLoa
             />
           </svg>
         </a>
-        <button className="p-2 text-gray-400 hover:text-red-500 transition-colors">
+        <button className={`p-2 text-gray-400 hover:text-red-500 transition-colors ${isFavorite(user.id) ? 'text-red-500' : ''}`} onClick={() => addFavorite(user)}>
           <svg
             className="w-6 h-6"
             fill="none"

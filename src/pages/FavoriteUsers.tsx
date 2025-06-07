@@ -1,22 +1,9 @@
-import { useState, useEffect } from 'react'
 import type { GitHubUser } from '../types'
-import UserCard from '../components/UserCard'
+import { useFavoriteStore } from '../store/useFavoriteStore'
+import UserCardWide from '../components/UserCardWide'
 
 export default function FavoriteUsers() {
-  const [favorites, setFavorites] = useState<GitHubUser[]>([])
-
-  useEffect(() => {
-    const savedFavorites = localStorage.getItem('favorites')
-    if (savedFavorites) {
-      setFavorites(JSON.parse(savedFavorites))
-    }
-  }, [])
-
-  const removeFavorite = (userId: number) => {
-    const newFavorites = favorites.filter(user => user.id !== userId)
-    setFavorites(newFavorites)
-    localStorage.setItem('favorites', JSON.stringify(newFavorites))
-  }
+  const { favorites } = useFavoriteStore()
 
   return (
     <div className="max-w-4xl mx-auto p-5">
@@ -35,7 +22,7 @@ export default function FavoriteUsers() {
         ) : (
           <div className="space-y-4">
             {favorites.map((user: GitHubUser) => (
-              <UserCard key={user.id} user={user} />
+              <UserCardWide key={user.id} user={user} optionRemoveOnly={true} style={{marginBottom: '10px'}} />
             ))}
           </div>
         )}
