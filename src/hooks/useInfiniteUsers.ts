@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react"
 import { usersService } from '../services/users'
-import type { GitHubUser } from '../types'
 import { useInfiniteQuery } from '@tanstack/react-query'
+import type { GitHubUser } from '../types'
 
 export const useInfiniteUsers = (perPage: number = 10) => {
   const [searchTerm, setSearchTerm] = useState("")
