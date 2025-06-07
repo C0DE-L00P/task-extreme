@@ -4,7 +4,7 @@ import UserCard from '../components/UserCard'
 import type { GitHubUser } from '../types'
 import { toast } from 'react-toastify'
 
-const PER_PAGE = 10
+const PER_PAGE = 6
 
 export default function PaginatedUsers() {
   const [users, setUsers] = useState<GitHubUser[]>([])
@@ -18,7 +18,7 @@ export default function PaginatedUsers() {
       .then(data => {
         console.log(data)
         if(data.message && data.message.includes('API rate limit exceeded')) throw new Error(data.message);
-        setUsers(prev => [...prev, ...data])
+        setUsers(data)
       }).catch((err:any) => {
         toast.error(err.message);
       })
@@ -29,7 +29,7 @@ export default function PaginatedUsers() {
     return users.filter(user =>
       user.login.toLowerCase().includes(searchTerm.toLowerCase())
     )
-  }, [users, searchTerm])
+  }, [users, searchTerm]);
 
   return (
     <div className="max-w-4xl mx-auto p-5">
@@ -56,20 +56,44 @@ export default function PaginatedUsers() {
           ))}
         </div>
       </div>
-
-      <footer className="mt-6 flex justify-center items-center space-x-4">
+      <footer className="mt-6 flex justify-center items-center space-x-3">
+        <button
+          onClick={() => setSearchParams({ since: '1', q: searchTerm })}
+          disabled={lastUserId === 1}
+          className="cursor-pointer px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md flex items-center"
+        >
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+          </svg>
+          First
+        </button>
         <button
           onClick={() => setSearchParams({ since: Math.max(1, lastUserId - PER_PAGE).toString(), q: searchTerm })}
           disabled={lastUserId === 1}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+          className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md flex items-center"
         >
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+          </svg>
           Previous
         </button>
         <button 
           onClick={() => setSearchParams({ since: (lastUserId + PER_PAGE).toString(), q: searchTerm })} 
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md"
+          className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md flex items-center"
         >
           Next
+          <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+        <button
+          onClick={() => setSearchParams({ since: (lastUserId + 100).toString(), q: searchTerm })}
+          className="cursor-pointer px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors shadow-sm hover:shadow-md flex items-center"
+        >
+          Last
+          <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+          </svg>
         </button>
       </footer>
     </div>
