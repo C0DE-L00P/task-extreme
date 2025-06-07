@@ -31,6 +31,17 @@ export default function PaginatedUsers() {
     )
   }, [users, searchTerm]);
 
+
+  const handleSearch = useMemo(() => {
+    const debounced = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const timeoutId = setTimeout(() => {
+        setSearchParams({ since: lastUserId.toString(), q: e.target.value })
+      }, 400)
+      return () => clearTimeout(timeoutId)
+    }
+    return debounced
+  }, [lastUserId, setSearchParams])
+
   return (
     <div className="max-w-4xl mx-auto p-5">
       <div className="mb-8">
@@ -39,8 +50,8 @@ export default function PaginatedUsers() {
           <input
             type="text"
             placeholder="Search users..."
-            value={searchTerm}
-            onChange={(e) => setSearchParams({ since: lastUserId.toString(), q: e.target.value })}
+            defaultValue={searchTerm}
+            onChange={(e) => handleSearch(e)}
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <svg className="w-5 h-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
