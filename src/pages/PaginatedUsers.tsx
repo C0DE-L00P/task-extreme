@@ -1,37 +1,12 @@
-import { useState, useEffect, useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useMemo } from 'react'
 import UserCard from '../components/UserCard'
+import { usePaginatedUsers } from '../hooks/usePaginatedUsers'
 import type { GitHubUser } from '../types'
-import { toast } from 'react-toastify'
 
 const PER_PAGE = 6
 
 export default function PaginatedUsers() {
-  const [users, setUsers] = useState<GitHubUser[]>([])
-  const [searchParams, setSearchParams] = useSearchParams()
-  const lastUserId = Number(searchParams.get('since') || '1')
-  const searchTerm = searchParams.get('q') || ''
-  const [isLoading, setIsLoading] = useState(false)
-
-  useEffect(() => {
-    setIsLoading(true)
-    fetch(`https://api.github.com/users?per_page=${PER_PAGE}&since=${lastUserId}`)
-      .then(res => res.json())
-      .then(data => {
-        if(data.message && data.message.includes('API rate limit exceeded')) throw new Error(data.message);
-        setUsers(data)
-      }).catch((err:any) => {
-        toast.error(err.message);
-      })
-      .finally(() => setIsLoading(false))
-  }, [lastUserId])
-
-  const filteredUsers = useMemo(() => {
-    if(searchTerm === '') return users
-    return users.filter(user =>
-      user.login.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  }, [users, searchTerm]);
+  const { users, isLoading, searchTerm, lastUserId, setSearchParams } = usePaginatedUsers()
 
   const handleSearch = useMemo(() => {
     const debounced = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,6 +17,7 @@ export default function PaginatedUsers() {
     }
     return debounced
   }, [lastUserId, setSearchParams])
+  
 
   return (
     <div className="max-w-4xl mx-auto p-5">
@@ -63,9 +39,15 @@ export default function PaginatedUsers() {
 
       <div className="bg-gray-50 rounded-xl shadow-inner p-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredUsers && filteredUsers.map(user => (
-            <UserCard key={user.id} user={user} isLoading={isLoading} />
-          ))}
+          {isLoading ? (
+            Array(6).fill(null).map((_, i) => (
+              <UserCard key={i} isLoading={true} />
+            ))
+          ) : (
+            users.map((user: GitHubUser) => (
+              <UserCard key={user.id} user={user} isLoading={false} />
+            ))
+          )}
         </div>
       </div>
       <footer className="mt-6 flex justify-center items-center space-x-3">

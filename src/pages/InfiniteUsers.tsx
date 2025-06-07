@@ -1,78 +1,18 @@
-import { useState, useEffect, useRef, useMemo } from "react";
 import { List, AutoSizer } from "react-virtualized";
 import type { ListRowProps } from "react-virtualized";
-import type { GitHubUser } from "../types";
-import { toast } from "react-toastify";
 import UserCardWide from "../components/UserCardWide";
+import { useInfiniteUsers } from "../hooks/useInfiniteUsers";
 
 export default function InfiniteUsers() {
-  const [users, setUsers] = useState<GitHubUser[]>([]);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const fetchedIds = useRef(new Set<number>());
-
-  useEffect(() => {
-    setLoading(true);
-    const lastUserId =
-      users && users.length > 0 ? users[users.length - 1]?.id : 0;
-    fetch(`https://api.github.com/users?per_page=10&since=${lastUserId}`)
-      .then((res) => res.json())
-      .then((data: any) => {
-        if (data.message && data.message.includes("API rate limit exceeded"))
-          throw new Error(data.message);
-        const uniqueNewUsers = data.filter(
-          (user: GitHubUser) => !fetchedIds.current.has(user.id)
-        );
-        uniqueNewUsers.forEach((user: GitHubUser) =>
-          fetchedIds.current.add(user.id)
-        );
-
-        if (uniqueNewUsers.length === 0 && data.length > 0) {
-          setPage((prev) => prev + 1);
-          setLoading(false);
-          return;
-        }
-
-        setUsers((prev) => [...prev, ...uniqueNewUsers]);
-        setHasMore(data.length > 0);
-        setLoading(false);
-      })
-      .catch((err: any) => {
-        toast.error(err.message);
-      });
-  }, [page]);
-
-  const filteredUsers = useMemo(() => {
-    if (searchTerm === "") return users;
-    return (
-      users.filter((user) =>
-        user.login.toLowerCase().includes(searchTerm.toLowerCase())
-      ) || []
-    );
-  }, [users, searchTerm]);
+  const { users, loading, hasMore, searchTerm, setSearchTerm, fetchNextPage } = useInfiniteUsers();
 
   const rowRenderer = ({ key, index, style }: ListRowProps) => {
-    const user = filteredUsers[index];
-    if (!user) return null;
-
-    return (
-      <UserCardWide user={user} key={key} style={style}/>
-    );
+    return users[index] && <UserCardWide user={users[index]} key={key} style={style}/>;
   };
 
-  const handleScroll = ({
-    clientHeight,
-    scrollHeight,
-    scrollTop,
-  }: {
-    clientHeight: number;
-    scrollHeight: number;
-    scrollTop: number;
-  }) => {
+  const handleScroll = ({ clientHeight, scrollHeight, scrollTop }: { clientHeight: number; scrollHeight: number; scrollTop: number }) => {
     if (!loading && hasMore && scrollHeight - scrollTop - clientHeight < 300) {
-      setPage((prev) => prev + 1);
+      fetchNextPage();
     }
   };
 
@@ -109,7 +49,7 @@ export default function InfiniteUsers() {
             <List
               width={width}
               height={height}
-              rowCount={filteredUsers.length}
+              rowCount={users.length}
               rowHeight={120}
               rowRenderer={rowRenderer}
               onScroll={handleScroll}
